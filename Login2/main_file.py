@@ -2,12 +2,15 @@
 from PyQt5 import QtWidgets, uic
 import mysql.connector
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
 
+# GLOBALS
 numero_id = None
 busca_id = None
 busca_id2 = None
 login_user = ""
 
+# DATABASE LINK
 banco2 = mysql.connector.connect(
     host="localhost",
     user="root",
@@ -15,8 +18,8 @@ banco2 = mysql.connector.connect(
     database="db_1"
 )
 
-
-# funções
+# FUNCTIONS
+# START LOGIN
 def def_login():
     print("tela de login")
     global login_user
@@ -35,9 +38,10 @@ def def_login():
         main_sc.label_8.setText(login_user)
         login_sc.close()
     else:
-        login_sc.label_status.setText("Tá errado burro!!")
+        login_sc.label_status.setText("Usuário ou senha incorretos!!")
 
 
+# START HOME
 def def_home():
     main_sc.users.close()
     main_sc.home.show()
@@ -48,23 +52,23 @@ def def_home():
     main_sc.label_8.setText(login_user)
     # batches
     cursor = banco2.cursor()
-    comando_sql1 = ("SELECT * FROM controle_lote1 order by lote desc LIMIT 2")
+    comando_sql1 = ("SELECT lote, data_abert, data_fech, lote_status FROM controle_lote1 order by lote desc LIMIT 2")
     cursor.execute(comando_sql1)
     dados_lidos1 = cursor.fetchall()
     print(dados_lidos1)
 
     main_sc.tableWidget.setRowCount(len(dados_lidos1))
-    main_sc.tableWidget.setColumnCount(5)
+    main_sc.tableWidget.setColumnCount(4)
 
     for i in range(0, len(dados_lidos1)):
-        for j in range(0, 5):
+        for j in range(0, 4):
             main_sc.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
 
     # carteirinhas
     busca_id = "Tudo"
 
     cursor = banco2.cursor()
-    comando_sql2 = ("SELECT * FROM carteirinhas order by id desc LIMIT 3")
+    comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by id desc LIMIT 3")
     cursor.execute(comando_sql2)
     dados_lidos = cursor.fetchall()
     print(dados_lidos)
@@ -75,9 +79,10 @@ def def_home():
     for i in range(0, len(dados_lidos)):
         for j in range(0, 7):
             main_sc.tableWidget_2.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos[i][j])))
+# END HOME
 
 
-# User
+# START USERS
 def def_users():
     main_sc.home.close()
     main_sc.batch.close()
@@ -90,16 +95,16 @@ def def_users():
 
 def def_list_users():
     cursor = banco2.cursor()
-    comando_sql1 = ("SELECT * FROM login order by id")
+    comando_sql1 = ("SELECT data, nome, login, email FROM login order by id")
     cursor.execute(comando_sql1)
     dados_lidos1 = cursor.fetchall()
     print(dados_lidos1)
 
     main_sc.tableWidget_6.setRowCount(len(dados_lidos1))
-    main_sc.tableWidget_6.setColumnCount(6)
+    main_sc.tableWidget_6.setColumnCount(4)
 
     for i in range(0, len(dados_lidos1)):
-        for j in range(0, 6):
+        for j in range(0, 4):
             main_sc.tableWidget_6.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
 
 
@@ -116,6 +121,7 @@ def def_add_users():
         if senha1 == senha2:
             cursor = banco2.cursor()
             cursor.execute("Insert into login Values (null, now(), '" + nome + "','" + login1 + "','" + senha1 + "', '" + email + "')")
+            cursor.commit()
             main_sc.label_20.setText("Usuário cadastrado com Sucesso!!")
             main_sc.lineEdit.setText("")
             main_sc.lineEdit_2.setText("")
@@ -143,11 +149,13 @@ def def_users_pdf():
     main_sc.label_20.setText("")
 
     cursor = banco2.cursor()
-    comando_sql = "SELECT * FROM login order by id asc"
+    comando_sql = "SELECT id, data, nome, login, email FROM login order by id asc"
     cursor.execute(comando_sql)
     dados_lidos = cursor.fetchall()
     y = 0
-    pdf = canvas.Canvas("cadastro_usuarios.pdf")
+    #user_windows = getpass.getuser()
+    #pdf = canvas.Canvas(f'C:\\Users\\{user_windows}\\Desktop\\cadastro_usuarios.pdf', pagesize=A4)
+    pdf = canvas.Canvas("cadastro_usuarios.pdf", pagesize=A4)
     pdf.setFont("Times-Bold", 18)
     pdf.drawString(200, 800, "Usuários Cadastrados: ")
     # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
@@ -157,8 +165,7 @@ def def_users_pdf():
     pdf.drawString(60, 750, "Data Criação")
     pdf.drawString(180, 750, "Nome")
     pdf.drawString(300, 750, "Login")
-    pdf.drawString(370, 750, "Senha")
-    pdf.drawString(430, 750, "Email")
+    pdf.drawString(370, 750, "Email")
 
     for i in range(0, len(dados_lidos)):
         y = y + 25  # espaçamento entre linhas
@@ -167,14 +174,14 @@ def def_users_pdf():
         pdf.drawString(180, 750 - y, str(dados_lidos[i][2]))
         pdf.drawString(300, 750 - y, str(dados_lidos[i][3]))
         pdf.drawString(370, 750 - y, str(dados_lidos[i][4]))
-        pdf.drawString(430, 750 - y, str(dados_lidos[i][5]))
 
     pdf.save()
     main_sc.label_20.setText("PDF Gerado com sucesso!!")
     print("Status da função: pdf gerado")
+# END USERS
 
 
-# Batch
+# START BATCH
 def def_batch():
     main_sc.label_38.setText("")
     main_sc.lineEdit_9.setText("")
@@ -193,6 +200,7 @@ def def_add_batch():
     cursor2 = banco2.cursor()
     abrir = ("Insert into controle_lote1 (id, lote, data_abert, data_fech, lote_status) values (null,'" + nlote + "', now(), null, 'Aberto')")
     cursor2.execute(abrir)
+    cursor2.commit()
     main_sc.label_38.setText("Novo Lote Aberto")
     def_list_batch()
     print("Aberto")
@@ -230,20 +238,21 @@ def def_del_batch():
 
 def def_list_batch():
     cursor = banco2.cursor()
-    comando_sql1 = ("SELECT * FROM controle_lote1 order by lote desc")
+    comando_sql1 = ("SELECT lote, data_abert, data_fech, lote_status FROM controle_lote1 order by lote desc")
     cursor.execute(comando_sql1)
     dados_lidos1 = cursor.fetchall()
     print(dados_lidos1)
 
     main_sc.tableWidget_4.setRowCount(len(dados_lidos1))
-    main_sc.tableWidget_4.setColumnCount(5)
+    main_sc.tableWidget_4.setColumnCount(4)
 
     for i in range(0, len(dados_lidos1)):
-        for j in range(0, 5):
+        for j in range(0, 4):
             main_sc.tableWidget_4.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
+# END BATCH
 
 
-# ID Cards
+# START ID CARD
 def def_id_card():
     main_sc.home.close()
     main_sc.users.close()
@@ -302,9 +311,10 @@ def def_add_idcard():
         main_sc.lineEdit_8.setText("")
     else:
         main_sc.label_29.setText("Lote já está fechado, abra outro primeiro!!")
+# END ID CARD
 
 
-# REPORTS
+# START REPORTS
 def def_reports_id():
     main_sc.home.close()
     main_sc.users.close()
@@ -323,12 +333,12 @@ def def_reports_all():
 
     if busca_id != "":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT * FROM carteirinhas where tipo = '" + busca_id + "' order by ID desc")
+        comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where tipo = '" + busca_id + "' order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     else:
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT * FROM carteirinhas order by ID desc")
+        comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
 
@@ -351,17 +361,22 @@ def def_reports_name():
 
     if busca_id2 == 'nome':
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT * FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "ra":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT * FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
+        cursor.execute(comando_sql2)
+        dados_lidos = cursor.fetchall()
+    elif busca_id2 == "usuario":
+        cursor = banco2.cursor()
+        comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where user_cadastro like '%" + busca_id + "%' order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     else:
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT * FROM carteirinhas where lote like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where lote like '%" + busca_id + "%' order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
 
@@ -407,6 +422,11 @@ def def_reports_type():
         busca_id = main_sc.lineEdit_10.text()
         print(busca_id)
         def_reports_name()
+    elif main_sc.radioButton_11.isChecked():
+        busca_id2 = "usuario"
+        busca_id = main_sc.lineEdit_10.text()
+        print(busca_id)
+        def_reports_name()
     else:
         busca_id = ""
         print(busca_id)
@@ -416,16 +436,18 @@ def def_reports_type():
 def def_reports_date():
     print("datas")
 
+
 def def_reports_pdf():
     print("pdf reports")
     global busca_id
+    global busca_id2
     print("ID Busca: ", busca_id)
     print(30 * "-")
     #main_sc.label_44.setText("")
 
     if busca_id == "":
         cursor = banco2.cursor()
-        comando_sql = "SELECT * FROM carteirinhas order by ID desc"
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by ID desc")
         cursor.execute(comando_sql)
         dados_lidos = cursor.fetchall()
         y = 0
@@ -435,31 +457,31 @@ def def_reports_pdf():
         # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
         pdf.setFont("Times-Bold", 10)
 
-        pdf.drawString(20, 750, "ID")
-        pdf.drawString(60, 750, "Lote")
-        pdf.drawString(110, 750, "Data")
-        pdf.drawString(250, 750, "Nome")
-        pdf.drawString(390, 750, "RA")
-        pdf.drawString(460, 750, "Tipo")
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
         pdf.drawString(600, 750, "Cadastrado por")
 
         for i in range(0, len(dados_lidos)):
             y = y + 25  # espaçamento entre linhas
             pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
-            pdf.drawString(60, 750 - y, str(dados_lidos[i][1]))
-            pdf.drawString(110, 750 - y, str(dados_lidos[i][2]))
-            pdf.drawString(250, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
             pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
-            pdf.drawString(460, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
             pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
 
         pdf.save()
         main_sc.label_44.setText("PDF Gerado com sucesso1!!")
-    else:
+    elif busca_id == '1ª Via':
         print(30 * "-")
         print("Busca id: ", busca_id)
         cursor = banco2.cursor()
-        comando_sql = "SELECT * FROM carteirinhas where tipo = '" + busca_id + "' order by ID"
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where tipo = '" + busca_id + "' order by ID")
         cursor.execute(comando_sql)
         dados_lidos = cursor.fetchall()
         y = 0
@@ -469,28 +491,272 @@ def def_reports_pdf():
         # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
         pdf.setFont("Times-Bold", 10)
 
-        pdf.drawString(20, 750, "ID")
-        pdf.drawString(60, 750, "Lote")
-        pdf.drawString(100, 750, "Data")
-        pdf.drawString(180, 750, "Nome")
-        pdf.drawString(360, 750, "RA")
-        pdf.drawString(430, 750, "Tipo")
-        pdf.drawString(500, 750, "Cadastrado por")
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(600, 750, "Cadastrado por")
 
         for i in range(0, len(dados_lidos)):
             y = y + 25  # espaçamento entre linhas
             pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
-            pdf.drawString(60, 750 - y, str(dados_lidos[i][1]))
-            pdf.drawString(100, 750 - y, str(dados_lidos[i][2]))
-            pdf.drawString(180, 750 - y, str(dados_lidos[i][3]))
-            pdf.drawString(360, 750 - y, str(dados_lidos[i][4]))
-            pdf.drawString(430, 750 - y, str(dados_lidos[i][5]))
-            pdf.drawString(500, 750 - y, str(dados_lidos[i][6]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id == '2ª Via':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where tipo = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(550, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(550, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id == 'Atualização de foto':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where tipo = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(550, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(550, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id2 == 'nome':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        print("Busca id: ", busca_id2)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
+        #comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where nome = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(600, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id2 == 'ra':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
+        #comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where ra = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(600, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id2 == 'lote':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        print("Busca id2: ", busca_id2)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where lote like '%" + busca_id + "%' order by ID desc")
+        #comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where lote = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(600, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id2 == 'usuario':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where user_cadastro like '%" + busca_id + "%' order by ID desc")
+        #comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where user_cadastro = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(600, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
+
+        pdf.save()
+        main_sc.label_44.setText("PDF Gerado com sucesso2!!")
+    elif busca_id == 'data':
+        print(30 * "-")
+        print("Busca id: ", busca_id)
+        cursor = banco2.cursor()
+        comando_sql = ("SELECT lote, data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where data = '" + busca_id + "' order by ID")
+        cursor.execute(comando_sql)
+        dados_lidos = cursor.fetchall()
+        y = 0
+        pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+        pdf.setFont("Times-Bold", 18)
+        pdf.drawString(200, 800, "Carteirinhas Cadastradas: ")
+        # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
+        pdf.setFont("Times-Bold", 10)
+
+        pdf.drawString(20, 750, "Lote")
+        pdf.drawString(50, 750, "Data")
+        pdf.drawString(150, 750, "Nome")
+        pdf.drawString(320, 750, "RA/CPF/RG")
+        pdf.drawString(390, 750, "Tipo")
+        pdf.drawString(500, 750, "Categoria")
+        pdf.drawString(600, 750, "Cadastrado por")
+
+        for i in range(0, len(dados_lidos)):
+            y = y + 25  # espaçamento entre linhas
+            pdf.drawString(20, 750 - y, str(dados_lidos[i][0]))
+            pdf.drawString(50, 750 - y, str(dados_lidos[i][1]))
+            pdf.drawString(150, 750 - y, str(dados_lidos[i][2]))
+            pdf.drawString(320, 750 - y, str(dados_lidos[i][3]))
+            pdf.drawString(390, 750 - y, str(dados_lidos[i][4]))
+            pdf.drawString(500, 750 - y, str(dados_lidos[i][5]))
+            pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
 
         pdf.save()
         main_sc.label_44.setText("PDF Gerado com sucesso2!!")
     print("Status da função: pdf gerado")
-
+# END REPORTS
 
 # ABOUT
 def def_about_app():
@@ -517,6 +783,7 @@ def def_about_app():
     main_sc.label_53.setText(data)
 
 
+# LOGOFF
 def def_logout():
     main_sc.close()
     login_sc.show()
@@ -524,14 +791,15 @@ def def_logout():
     login_sc.lineEdit_2.setText("")
 
 
-# telas
+# FORMS
 app = QtWidgets.QApplication([])
 login_sc = uic.loadUi("login.ui")
 main_sc = uic.loadUi("main_window.ui")
 
-# Buttons login
+# BUTTONS
+# lOGIN
 login_sc.b_login.clicked.connect(def_login)
-# Buttons main window
+# MAIN WINDOW
 main_sc.pushButton.clicked.connect(def_home)
 main_sc.pushButton_2.clicked.connect(def_users)
 main_sc.pushButton_3.clicked.connect(def_batch)
@@ -545,12 +813,12 @@ main_sc.pushButton_7.clicked.connect(def_add_users)
 main_sc.pushButton_15.clicked.connect(def_list_users)
 main_sc.pushButton_16.clicked.connect(def_del_users)
 main_sc.pushButton_17.clicked.connect(def_users_pdf)
-# batch
+# BATCHES
 main_sc.pushButton_9.clicked.connect(def_add_batch)
 main_sc.pushButton_10.clicked.connect(def_close_batch)
 main_sc.pushButton_11.clicked.connect(def_list_batch)
 main_sc.pushButton_12.clicked.connect(def_del_batch)
-# reports
+# REPORTS
 main_sc.pushButton_13.clicked.connect(def_reports_type)
 main_sc.pushButton_14.clicked.connect(def_reports_pdf)
 
@@ -558,3 +826,4 @@ main_sc.pushButton_14.clicked.connect(def_reports_pdf)
 login_sc.show()
 #main_sc.show()
 app.exec()
+

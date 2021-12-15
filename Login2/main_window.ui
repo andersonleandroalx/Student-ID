@@ -2262,20 +2262,6 @@ background-color: rgb(85, 170, 255);</string>
      </property>
      <column>
       <property name="text">
-       <string>ID</string>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="textAlignment">
-       <set>AlignCenter</set>
-      </property>
-     </column>
-     <column>
-      <property name="text">
        <string>Nº do Lote</string>
       </property>
       <property name="font">
@@ -2343,21 +2329,6 @@ background-color: rgb(85, 170, 255);</string>
      <property name="styleSheet">
       <string notr="true">background-color: rgb(255, 255, 255);</string>
      </property>
-     <column>
-      <property name="text">
-       <string>ID</string>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>8</pointsize>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="textAlignment">
-       <set>AlignCenter</set>
-      </property>
-     </column>
      <column>
       <property name="text">
        <string>Lote</string>
@@ -2431,6 +2402,20 @@ background-color: rgb(85, 170, 255);</string>
      <column>
       <property name="text">
        <string>Categoria</string>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignCenter</set>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Cadastrado por</string>
       </property>
       <property name="font">
        <font>
