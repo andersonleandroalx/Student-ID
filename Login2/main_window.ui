@@ -131,7 +131,7 @@
      <property name="geometry">
       <rect>
        <x>229</x>
-       <y>14</y>
+       <y>16</y>
        <width>71</width>
        <height>61</height>
       </rect>
@@ -794,7 +794,8 @@ border-width: 2px;</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(85, 170, 0);</string>
+       <string notr="true">background-color: rgb(85, 170, 0);
+color: rgb(255, 255, 255);</string>
       </property>
       <property name="text">
        <string>Consultar</string>
@@ -816,7 +817,8 @@ border-width: 2px;</string>
        </font>
       </property>
       <property name="styleSheet">
-       <string notr="true">background-color: rgb(220, 79, 255);</string>
+       <string notr="true">background-color: rgb(220, 79, 255);
+color: rgb(255, 255, 255);</string>
       </property>
       <property name="text">
        <string>Gerar PDF</string>
@@ -942,20 +944,9 @@ color: rgb(0, 0, 0);</string>
        <height>271</height>
       </rect>
      </property>
-     <column>
-      <property name="text">
-       <string>ID</string>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="textAlignment">
-       <set>AlignCenter</set>
-      </property>
-     </column>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
+     </property>
      <column>
       <property name="text">
        <string>Lote</string>
@@ -1612,9 +1603,9 @@ p, li { white-space: pre-wrap; }
     <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
       <rect>
-       <x>550</x>
-       <y>10</y>
-       <width>211</width>
+       <x>560</x>
+       <y>47</y>
+       <width>201</width>
        <height>80</height>
       </rect>
      </property>
@@ -1901,7 +1892,7 @@ background-color: rgb(85, 170, 255);</string>
       <rect>
        <x>10</x>
        <y>46</y>
-       <width>531</width>
+       <width>541</width>
        <height>171</height>
       </rect>
      </property>
@@ -1917,7 +1908,7 @@ background-color: rgb(85, 170, 255);</string>
      <widget class="QPushButton" name="pushButton_8">
       <property name="geometry">
        <rect>
-        <x>440</x>
+        <x>460</x>
         <y>130</y>
         <width>75</width>
         <height>23</height>
@@ -2002,25 +1993,14 @@ background-color: rgb(85, 170, 255);</string>
      <property name="geometry">
       <rect>
        <x>11</x>
-       <y>263</y>
+       <y>273</y>
        <width>751</width>
-       <height>241</height>
+       <height>231</height>
       </rect>
      </property>
-     <column>
-      <property name="text">
-       <string>ID</string>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="textAlignment">
-       <set>AlignCenter</set>
-      </property>
-     </column>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
+     </property>
      <column>
       <property name="text">
        <string>Lote</string>
@@ -2105,15 +2085,35 @@ background-color: rgb(85, 170, 255);</string>
        <set>AlignCenter</set>
       </property>
      </column>
+     <column>
+      <property name="text">
+       <string>Cadastrado Por</string>
+      </property>
+      <property name="font">
+       <font>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="textAlignment">
+       <set>AlignCenter</set>
+      </property>
+     </column>
     </widget>
     <widget class="QLabel" name="label_36">
      <property name="geometry">
       <rect>
-       <x>20</x>
+       <x>270</x>
        <y>240</y>
-       <width>141</width>
-       <height>16</height>
+       <width>161</width>
+       <height>20</height>
       </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
      </property>
      <property name="text">
       <string>Últimos Itens Adicionados</string>
@@ -2132,6 +2132,75 @@ background-color: rgb(85, 170, 255);</string>
       <enum>Qt::Horizontal</enum>
      </property>
     </widget>
+    <widget class="QPushButton" name="pushButton_19">
+     <property name="geometry">
+      <rect>
+       <x>12</x>
+       <y>240</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(85, 170, 255);
+color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Atualizar</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_20">
+     <property name="geometry">
+      <rect>
+       <x>94</x>
+       <y>240</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(0, 170, 0);
+color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Alterar</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pushButton_21">
+     <property name="geometry">
+      <rect>
+       <x>175</x>
+       <y>240</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Deletar</string>
+     </property>
+    </widget>
     <zorder>label_11</zorder>
     <zorder>groupBox</zorder>
     <zorder>frame_2</zorder>
@@ -2146,6 +2215,9 @@ background-color: rgb(85, 170, 255);</string>
     <zorder>tableWidget_3</zorder>
     <zorder>label_36</zorder>
     <zorder>line_9</zorder>
+    <zorder>pushButton_19</zorder>
+    <zorder>pushButton_20</zorder>
+    <zorder>pushButton_21</zorder>
    </widget>
    <widget class="QFrame" name="home">
     <property name="geometry">
@@ -2196,6 +2268,9 @@ background-color: rgb(85, 170, 255);</string>
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(0, 85, 255);</string>
      </property>
      <property name="text">
       <string/>
@@ -2550,20 +2625,6 @@ background-color: rgb(85, 170, 255);</string>
      </property>
      <column>
       <property name="text">
-       <string>ID</string>
-      </property>
-      <property name="font">
-       <font>
-        <weight>75</weight>
-        <bold>true</bold>
-       </font>
-      </property>
-      <property name="textAlignment">
-       <set>AlignCenter</set>
-      </property>
-     </column>
-     <column>
-      <property name="text">
        <string>Nº Lote</string>
       </property>
       <property name="font">
@@ -2623,7 +2684,7 @@ background-color: rgb(85, 170, 255);</string>
      <property name="geometry">
       <rect>
        <x>27</x>
-       <y>64</y>
+       <y>44</y>
        <width>47</width>
        <height>13</height>
       </rect>
@@ -2645,7 +2706,7 @@ background-color: rgb(85, 170, 255);</string>
      <property name="geometry">
       <rect>
        <x>80</x>
-       <y>56</y>
+       <y>36</y>
        <width>113</width>
        <height>31</height>
       </rect>
@@ -2667,7 +2728,7 @@ border-width: 2px;</string>
      <property name="geometry">
       <rect>
        <x>60</x>
-       <y>93</y>
+       <y>73</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -2689,7 +2750,7 @@ border-width: 2px;</string>
      <property name="geometry">
       <rect>
        <x>143</x>
-       <y>93</y>
+       <y>73</y>
        <width>75</width>
        <height>23</height>
       </rect>
@@ -2701,7 +2762,7 @@ border-width: 2px;</string>
     <widget class="QPushButton" name="pushButton_11">
      <property name="geometry">
       <rect>
-       <x>110</x>
+       <x>21</x>
        <y>217</y>
        <width>75</width>
        <height>23</height>
@@ -2714,7 +2775,8 @@ border-width: 2px;</string>
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(85, 170, 255);</string>
+      <string notr="true">background-color: rgb(85, 170, 255);
+color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Atualizar</string>
@@ -2724,7 +2786,7 @@ border-width: 2px;</string>
      <property name="geometry">
       <rect>
        <x>9</x>
-       <y>49</y>
+       <y>29</y>
        <width>221</width>
        <height>81</height>
       </rect>
@@ -2742,7 +2804,7 @@ border-width: 2px;</string>
     <widget class="QPushButton" name="pushButton_12">
      <property name="geometry">
       <rect>
-       <x>21</x>
+       <x>103</x>
        <y>217</y>
        <width>81</width>
        <height>23</height>
@@ -2755,7 +2817,8 @@ border-width: 2px;</string>
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(223, 32, 35);</string>
+      <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Deletar lote</string>
@@ -2778,7 +2841,7 @@ border-width: 2px;</string>
      <property name="geometry">
       <rect>
        <x>20</x>
-       <y>170</y>
+       <y>120</y>
        <width>381</width>
        <height>16</height>
       </rect>
@@ -2794,6 +2857,29 @@ border-width: 2px;</string>
       <string/>
      </property>
     </widget>
+    <widget class="QPushButton" name="pushButton_22">
+     <property name="geometry">
+      <rect>
+       <x>686</x>
+       <y>220</y>
+       <width>75</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(139, 85, 255);
+color: rgb(255, 255, 255);</string>
+     </property>
+     <property name="text">
+      <string>Gerar PDF</string>
+     </property>
+    </widget>
     <zorder>label_10</zorder>
     <zorder>tableWidget_4</zorder>
     <zorder>pushButton_11</zorder>
@@ -2805,6 +2891,7 @@ border-width: 2px;</string>
     <zorder>pushButton_12</zorder>
     <zorder>line_10</zorder>
     <zorder>label_38</zorder>
+    <zorder>pushButton_22</zorder>
    </widget>
    <widget class="QFrame" name="users">
     <property name="geometry">
@@ -3187,6 +3274,9 @@ border-width: 2px;</string>
        <height>161</height>
       </rect>
      </property>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(255, 255, 255);</string>
+     </property>
      <column>
       <property name="text">
        <string>Data de Criação</string>
@@ -3260,7 +3350,8 @@ border-width: 2px;</string>
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(85, 170, 255);</string>
+      <string notr="true">background-color: rgb(85, 170, 255);
+color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Atualizar</string>
@@ -3282,7 +3373,8 @@ border-width: 2px;</string>
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(255, 34, 34);</string>
+      <string notr="true">background-color: rgb(255, 0, 0);
+color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Deletar</string>
@@ -3304,7 +3396,8 @@ border-width: 2px;</string>
       </font>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(139, 85, 255);</string>
+      <string notr="true">background-color: rgb(139, 85, 255);
+color: rgb(255, 255, 255);</string>
      </property>
      <property name="text">
       <string>Gerar PDF</string>
@@ -3330,11 +3423,11 @@ border-width: 2px;</string>
     <zorder>pushButton_16</zorder>
     <zorder>pushButton_17</zorder>
    </widget>
+   <zorder>batch</zorder>
    <zorder>users</zorder>
    <zorder>reports_id</zorder>
-   <zorder>about_app</zorder>
-   <zorder>batch</zorder>
    <zorder>id_card</zorder>
+   <zorder>about_app</zorder>
    <zorder>frame</zorder>
    <zorder>home</zorder>
   </widget>
