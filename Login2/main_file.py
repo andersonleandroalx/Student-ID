@@ -218,28 +218,16 @@ def def_check_batch():# Regularizar função
         print("não deu")
 
 
-def def_add_batch(): # Regularizar função - Erro no if com insert ???
+def def_add_batch():
     nlote = int(main_sc.lineEdit_9.text())
-    print(nlote)
-    print(30*"-")
 
-    cursor = banco2.cursor()
-    cursor.execute("SELECT lote FROM controle_lote1 order by lote desc")
-    dados_lidos = cursor.fetchone()
-    valor_id = dados_lidos[0]
-    print(type(valor_id))
-    print(type(nlote))
-
-    if valor_id != nlote:
-        cursor2 = banco2.cursor()
-        abrir = ("Insert into controle_lote1 (id, lote, data_abert, data_fech, lote_status) values (null,'" + str(nlote) + "', now(), null, 'Aberto')")
-        cursor2.execute(abrir)
-        main_sc.label_38.setText("Novo Lote Aberto")
-        def_list_batch()
-        print("Aberto")
-    else:
-        main_sc.label_38.setText("Lote já está aberto")
-        print("não deu")
+    cursor2 = banco2.cursor()
+    abrir = ("Insert into controle_lote1 (id, lote, data_abert, data_fech, lote_status) values (null,'" + str(nlote) + "', now(), null, 'Aberto')")
+    cursor2.execute(abrir)
+    main_sc.label_38.setText("Novo Lote Aberto")
+    def_list_batch()
+    #alert_sc.show()
+    #alert_sc.label.setText("Deseja cadastrar novos cartões de estudante agora?")
 
 
 def def_close_batch():
@@ -250,6 +238,8 @@ def def_close_batch():
     cursor2.execute(consulta)
     main_sc.label_38.setText("O lote selecionado foi fechado")
     def_list_batch()
+    #alert_sc.show()
+    #alert_sc.label.setText("Deseja abrir um arquivo de remessa agora?")
 
 
 def def_del_batch():
@@ -607,10 +597,19 @@ def def_logout():
     login_sc.lineEdit_2.setText("")
 
 
+# ALERT
+def def_alert_close():
+    alert_sc.close()
+
+def def_alert_id_open():
+    alert_sc.close()
+    main_sc.id_card.show()
+
 # FORMS
 app = QtWidgets.QApplication([])
 login_sc = uic.loadUi("login.ui")
 main_sc = uic.loadUi("main_window.ui")
+alert_sc = uic.loadUi("alerta.ui")
 
 # BUTTONS
 # lOGIN
@@ -639,9 +638,12 @@ main_sc.pushButton_19.clicked.connect(def_list_id)
 # REPORTS
 main_sc.pushButton_13.clicked.connect(def_reports_type)
 main_sc.pushButton_14.clicked.connect(def_reports_pdf)
+# ALERT
+alert_sc.pushButton.clicked.connect(def_alert_id_open)
+alert_sc.pushButton_2.clicked.connect(def_alert_close)
+
 
 
 login_sc.show()
 #main_sc.show()
 app.exec()
-
