@@ -1,7 +1,10 @@
 # import do PyQt5 o módulo Qtwidgets e uic para carregar as telas e as funções atribuidas aos botões
 from PyQt5 import QtWidgets, uic
+from PyQt5 import QtGui
+from PyQt5.QtGui import QPixmap
 import mysql.connector
 from reportlab.pdfgen import canvas
+import datetime
 from reportlab.lib.pagesizes import A4
 
 # GLOBALS
@@ -25,23 +28,47 @@ banco2 = mysql.connector.connect(
 # START LOGIN
 def def_login():
     global login_user
-    global permissao
+#    global permissao
+
     login_sc.label_status.setText("")
     nome_user = login_sc.lineEdit.text()
     senha = login_sc.lineEdit_2.text()
+    print(nome_user, senha)
 
-    cursor = banco2.cursor()
-    cursor.execute("Select login, senha, permissao1 from login where login='" + nome_user + "' and senha='" + senha + "'")
-    result = cursor.fetchone()
-    permissao = (str(result[2]))
-    if result:
-        login_user = nome_user
-        main_sc.show()
-        def_home()
-        main_sc.label_8.setText(login_user)
-        login_sc.close()
+    if nome_user and senha:
+        try:
+            cursor = banco2.cursor()
+            #cursor.execute("Select login, senha from login where login ='" + nome_user + "' and senha='" + senha + "'")
+            cursor.execute("Select login, senha from login")
+            result = cursor.fetchall()
+            print(result)
+            #user_s, senha_s = result
+            #print(user_s, senha_s)
+            for user_s, senha_s in result:
+                if nome_user == user_s and senha == senha_s:
+                    #if result:
+                    login_user = nome_user
+                    main_sc.show()
+                    def_home()
+                    main_sc.label_8.setText(login_user)
+                    login_sc.close()
+                    print(user_s, senha_s)
+                    #print("ok")
+                    #print(30 * "-")
+                    #break
+                else:
+                    login_sc.label_status.setText("Usuário ou senha incorretos!!")
+        except mysql.connector.Error as err:
+            print("deu erro: ", err)
+            login_sc.lineEdit.setText("")
+            login_sc.lineEdit_2.setText("")
+            login_sc.label_status.setText("Erro de digitação")
     else:
-        login_sc.label_status.setText("Usuário ou senha incorretos!!")
+        login_sc.label_status.setText("Preencha os dados")
+
+    #    permissao = (str(result[2]))
+        #if user_s == nome_user
+
 
 
 # START HOME
@@ -50,8 +77,7 @@ def def_home():
     main_sc.home.show()
     global busca_id
     global login_user
-    global permissao
-    print(type(permissao))
+#    global permissao
 
     main_sc.label_8.setText(login_user)
     # batches
@@ -81,6 +107,7 @@ def def_home():
     for i in range(0, len(dados_lidos)):
         for j in range(0, 7):
             main_sc.tableWidget_2.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos[i][j])))
+
 # END HOME
 
 
@@ -92,26 +119,76 @@ def def_users():
     main_sc.reports_id.close()
     main_sc.about_app.close()
     main_sc.users.show()
+    def_list_info_users()
+
+
+def def_list_info_users():
+    global login_user
+    print(login_user)
+
+    #img_users = Image.open('img_users/user1.png')
+
+
+
+    cursor = banco2.cursor()
+    consulta = ("SELECT nome, login, email FROM login where login = '" + login_user + "'")
+    cursor.execute(consulta)
+    resultado = cursor.fetchone()
+    print(resultado)
+    nome_user, log_user, email_user = resultado
+
+    print(nome_user, log_user, email_user)
+    main_sc.label_69.setText(nome_user)
+    main_sc.label_70.setText(log_user)
+    main_sc.label_71.setText(email_user)
+    main_sc.label_72.setPixmap(QPixmap('img_users/' + login_user + '.png'))
+    main_sc.label_72.setGeometry(20, 30, 100, 80)
+
+
+
+def def_alter_pwd_form():
+    alt_pwd_user_sc.show()
+
+def def_alter_pwd_user():
+    global login_user
+
+    senha1 = alt_pwd_user_sc.lineEdit.text()
+    senha2 = alt_pwd_user_sc.lineEdit_2.text()
+
+    print(senha1, senha2)
+    if login_user:
+        if senha1 == senha2:
+            cursor = banco2.cursor()
+            consulta = ("UPDATE login SET senha = '" + senha1 + "' where '" + login_user + "' = login")
+            cursor.execute(consulta)
+            main_sc.label_20.setText("Senha atualizada com sucesso!!")
+            alt_pwd_user_sc.close()
+        else:
+            main_sc.label_20.setText("Senhas estão diferentes!")
+
+    else:
+        print("nenhum usuário selecionado")
+
 
 
 def def_list_users():
-    global permissao
-    print(type(permissao))
-    if permissao == '1':
+    #global permissao
+    #print(type(permissao))
+    #if permissao == '1':
 
-        cursor = banco2.cursor()
-        comando_sql1 = ("SELECT date_format(data, '%d-%m-%Y')data, nome, login, email FROM login order by id")
-        cursor.execute(comando_sql1)
-        dados_lidos1 = cursor.fetchall()
+    cursor = banco2.cursor()
+    comando_sql1 = ("SELECT date_format(data, '%d-%m-%Y')data, nome, login, email FROM login order by id")
+    cursor.execute(comando_sql1)
+    dados_lidos1 = cursor.fetchall()
 
-        main_sc.tableWidget_6.setRowCount(len(dados_lidos1))
-        main_sc.tableWidget_6.setColumnCount(4)
+    main_sc.tableWidget_6.setRowCount(len(dados_lidos1))
+    main_sc.tableWidget_6.setColumnCount(4)
 
-        for i in range(0, len(dados_lidos1)):
-            for j in range(0, 4):
-                main_sc.tableWidget_6.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
-    else:
-        main_sc.label_20.setText("Usuário sem permissão")
+    for i in range(0, len(dados_lidos1)):
+        for j in range(0, 4):
+            main_sc.tableWidget_6.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
+    #else:
+        #main_sc.label_20.setText("Usuário sem permissão")
 
 
 def def_add_users():
@@ -121,19 +198,22 @@ def def_add_users():
     senha2 = main_sc.lineEdit_4.text()
     email = main_sc.lineEdit_5.text()
 
-    if nome != "" and login1 != "" and senha1 != "" and senha2 != "" and email != "":
-        if senha1 == senha2:
-            cursor = banco2.cursor()
-            cursor.execute("Insert into login Values (null, now(), '" + nome + "','" + login1 + "','" + senha1 + "', '" + email + "')")
-            main_sc.label_20.setText("Usuário cadastrado com Sucesso!!")
-            main_sc.lineEdit.setText("")
-            main_sc.lineEdit_2.setText("")
-            main_sc.lineEdit_3.setText("")
-            main_sc.lineEdit_4.setText("")
-            main_sc.lineEdit_5.setText("")
-            def_list_users()
+    if nome and login1 and senha1 and senha2 and email:
+        if '@' in email and '.' in email[email.find('@'):]:
+            if senha1 == senha2:
+                cursor = banco2.cursor()
+                cursor.execute("Insert into login (data, nome, login, senha, email) Values (now(), '" + nome + "','" + login1 + "','" + senha1 + "', '" + email + "')")
+                main_sc.label_20.setText("Usuário cadastrado com Sucesso!!")
+                main_sc.lineEdit.setText("")
+                main_sc.lineEdit_2.setText("")
+                main_sc.lineEdit_3.setText("")
+                main_sc.lineEdit_4.setText("")
+                main_sc.lineEdit_5.setText("")
+                def_list_users()
+            else:
+                main_sc.label_20.setText("Senhas  digitadas são diferentes!")
         else:
-            main_sc.label_20.setText("Senhas não conferem")
+            main_sc.label_20.setText("Formato de email inválido")
     else:
         main_sc.label_20.setText("Preencha todos os campos | Usuário não cadastrado!")
 
@@ -196,50 +276,47 @@ def def_batch():
     main_sc.batch.show()
 
 
-def def_check_batch():# Regularizar função
-    nlote = int(main_sc.lineEdit_9.text())
+def def_check_batch():
+    global permissao
 
     cursor = banco2.cursor()
-    cursor.execute("SELECT lote FROM controle_lote1 order by lote desc")
+    cursor.execute("SELECT lote, lote_status FROM controle_lote1 order by lote desc")
     dados_lidos = cursor.fetchone()
-    valor_id = dados_lidos[0]
-    print(type(valor_id))
-    print(type(nlote))
-
-    if valor_id != nlote:
-        cursor2 = banco2.cursor()
-        abrir = ("Insert into controle_lote1 (id, lote, data_abert, data_fech, lote_status) values (null,'" + str(nlote) + "', now(), null, 'Aberto')")
-        cursor2.execute(abrir)
-        main_sc.label_38.setText("Novo Lote Aberto")
-        def_list_batch()
-        print("Aberto")
-    else:
-        main_sc.label_38.setText("Lote já está aberto")
-        print("não deu")
+    permissao = dados_lidos
 
 
 def def_add_batch():
-    nlote = int(main_sc.lineEdit_9.text())
+    #def_check_batch()
+    nlote = main_sc.lineEdit_9.text()
+    print(nlote)
 
-    cursor2 = banco2.cursor()
-    abrir = ("Insert into controle_lote1 (id, lote, data_abert, data_fech, lote_status) values (null,'" + str(nlote) + "', now(), null, 'Aberto')")
-    cursor2.execute(abrir)
-    main_sc.label_38.setText("Novo Lote Aberto")
-    def_list_batch()
-    #alert_sc.show()
-    #alert_sc.label.setText("Deseja cadastrar novos cartões de estudante agora?")
+    if nlote:
+        cursor2 = banco2.cursor()
+        abrir = ("Insert into controle_lote1 (lote, data_abert, data_fech, lote_status) values ('" + nlote + "', now(), null, 'Aberto')")
+        cursor2.execute(abrir)
+        main_sc.label_38.setText("Novo Lote Aberto")
+        def_list_batch()
+        alert_sc.show()
+        alert_sc.controle_alert.setText("add_id")
+        alert_sc.label.setText("Deseja cadastrar novos cartões de estudante agora?")
+    else:
+        main_sc.label_38.setText("Preencha o lote")
 
 
 def def_close_batch():
     nlote = main_sc.lineEdit_9.text()
 
-    cursor2 = banco2.cursor()
-    consulta = ("Update controle_lote1 set data_fech = now(), lote_status = 'Fechado' where lote = '" + nlote + "' ")
-    cursor2.execute(consulta)
-    main_sc.label_38.setText("O lote selecionado foi fechado")
-    def_list_batch()
-    #alert_sc.show()
-    #alert_sc.label.setText("Deseja abrir um arquivo de remessa agora?")
+    if nlote:
+        cursor2 = banco2.cursor()
+        consulta = ("Update controle_lote1 set data_fech = now(), lote_status = 'Fechado' where lote = '" + nlote + "' ")
+        cursor2.execute(consulta)
+        main_sc.label_38.setText("O lote selecionado foi fechado")
+        def_list_batch()
+        alert_sc.show()
+        alert_sc.controle_alert.setText("add_rem")
+        alert_sc.label.setText("Deseja abrir um arquivo de remessa agora?")
+    else:
+        main_sc.label_38.setText("Preencha o lote")
 
 
 def def_del_batch():
@@ -289,6 +366,17 @@ def def_id_card():
     main_sc.reports_id.close()
     main_sc.about_app.close()
     main_sc.id_card.show()
+    #def_check_batch()
+
+    '''global permissao
+    print("lote do add-id:", permissao)
+    lote, lote_status = permissao
+    print(lote)
+    print(type(lote))
+    print(lote_status)
+    main_sc.label_65.setText(str(lote))
+    main_sc.label_24.setText(str(lote_status))'''
+
 
 
 def def_list_id():
@@ -296,6 +384,7 @@ def def_list_id():
     comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by id desc LIMIT 7")
     cursor.execute(comando_sql2)
     dados_lidos = cursor.fetchall()
+    print(dados_lidos)
 
     main_sc.tableWidget_3.setRowCount(len(dados_lidos))
     main_sc.tableWidget_3.setColumnCount(7)
@@ -307,13 +396,23 @@ def def_list_id():
 
 def def_add_idcard(): # Melhorar função
     global login_user
+    #global permissao
+    #lote2, lote_status = permissao
+    #print(permissao)
+    lote_status = "Fechado"
 
+    #lote1 =  main_sc.label_65.text()
+    #print(lote_status)
     lote1 = main_sc.lineEdit_6.text()
     nome1 = main_sc.lineEdit_7.text()
     ra1 = main_sc.lineEdit_8.text()
-
+    print(lote1, nome1, ra1)
+    print(type(lote1))
+    print(type(nome1))
+    print(type(ra1))
 
     tipo1 = ""
+
     if main_sc.radioButton.isChecked():
         tipo1 = "1ª Via"
     elif main_sc.radioButton_2.isChecked():
@@ -323,24 +422,47 @@ def def_add_idcard(): # Melhorar função
     else:
         tipo1 = ""
 
-    if lote1 != "" and nome1 != "" and ra1 != "" and tipo1 != "":
-        cursor = banco2.cursor()
-        status_lote = ("select lote_status from controle_lote1 where lote = " + lote1)
-        cursor.execute(status_lote)
-        dados_lidos = cursor.fetchone()
-        status = (str(dados_lidos[0]))
-        if status == "Aberto":
+    print(30*"-")
+    print(type(tipo1))
+    print(tipo1)
+
+    if lote_status == "Aberto":
+        if lote1 and nome1 and ra1 and tipo1:
+            cursor = banco2.cursor()
             comando_sql = ("INSERT INTO carteirinhas (id, lote, data, nome, ra, tipo, categoria, user_cadastro) VALUES (null, '" + lote1 + "', now(),'" + nome1 + "','" + ra1 + "','" + tipo1 + "', 'Aluno', '" + login_user + "')")
             cursor.execute(comando_sql)
-            banco2.commit()
-            def_list_id()
-            main_sc.label_29.setText("Cadastro Efetuado com sucesso!!")
-            main_sc.lineEdit_7.setText("")
-            main_sc.lineEdit_8.setText("")
+            print("ok")
         else:
-            main_sc.label_29.setText("Lote já está fechado, abra outro primeiro!!")
+            print("erro")
     else:
-        main_sc.label_29.setText("Preencha os dados para cadastrar")
+        print("Lote está fechado, abra outro para iniciar")
+
+    #cursor = banco2.cursor()
+    #comando_sql = ("INSERT INTO carteirinhas (id, lote, data, nome, ra, tipo, categoria, user_cadastro) VALUES (null, '" + lote1 + "', now(),'" + nome1 + "','" + ra1 + "','" + tipo1 + "', 'Aluno', '" + login_user + "')")
+    #cursor.execute(comando_sql)
+
+    #if lote_status == "Aberto":
+    #if lote1 and nome1 and ra1 and tipo1:
+        #cursor = banco2.cursor()
+        #status_lote = ("select lote_status from controle_lote1 where lote = " + lote1)
+        #cursor.execute(status_lote)
+        #dados_lidos = cursor.fetchone()
+        #status = (dados_lidos[0])
+        #if status == "Aberto":
+        #if lote_status == "Aberto":
+        #if lote1 and nome1 and ra1 and tipo1:
+         #   cursor = banco2.cursor()
+          #  comando_sql = ("INSERT INTO carteirinhas (id, lote, data, nome, ra, tipo, categoria, user_cadastro) VALUES (null, '" + lote1 + "', now(),'" + nome1 + "','" + ra1 + "','" + tipo1 + "', 'Aluno', '" + login_user + "')")
+           # cursor.execute(comando_sql)
+            #banco2.commit()
+            #def_list_id()
+         #   main_sc.label_29.setText("Cadastro Efetuado com sucesso!!")
+         #   main_sc.lineEdit_7.setText("")
+         #   main_sc.lineEdit_8.setText("")
+        #else:
+        #    main_sc.label_29.setText("Lote já está fechado, abra outro primeiro!!")
+    #else:
+    #    main_sc.label_29.setText("Preencha os dados para cadastrar")
 
 
 def def_alter_idcard(): # Criar função
@@ -543,6 +665,7 @@ def def_reports_pdf():
     # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
     pdf.setFont("Times-Bold", 10)
 
+    pdf.drawString(20, 780, "Quantidade de ID's: ")
     pdf.drawString(20, 750, "Lote")
     pdf.drawString(50, 750, "Data")
     pdf.drawString(150, 750, "Nome")
@@ -562,7 +685,7 @@ def def_reports_pdf():
         pdf.drawString(600, 750 - y, str(dados_lidos[i][6]))
 
     pdf.save()
-    main_sc.label_44.setText("PDF Gerado com sucesso!!")
+    main_sc.label_44.setText("PDF Gerado com sucesso1!!")
 # END REPORTS
 
 # ABOUT
@@ -580,9 +703,7 @@ def def_about_app():
     sobre = ("select date_format(data, '%d-%m-%Y'), nome, email from login where login = '" + login_user + "'")
     cursor.execute(sobre)
     dados_lidos = cursor.fetchone()
-    data = (str(dados_lidos[0]))
-    nome = (str(dados_lidos[1]))
-    email = (str(dados_lidos[2]))
+    data, nome, email = dados_lidos
     main_sc.label_50.setText(nome)
     main_sc.label_51.setText(login_user)
     main_sc.label_52.setText(email)
@@ -602,14 +723,24 @@ def def_alert_close():
     alert_sc.close()
 
 def def_alert_id_open():
-    alert_sc.close()
-    main_sc.id_card.show()
+    indicador = alert_sc.label.text()
+    indicador2 = alert_sc.controle_alert.text()
+    print(indicador)
+    print(type(indicador2))
+
+    if indicador2 == "add_id":
+        alert_sc.close()
+        main_sc.id_card.show()
+    else:
+        alert_sc.close()
+        print("add rem")
 
 # FORMS
 app = QtWidgets.QApplication([])
 login_sc = uic.loadUi("login.ui")
 main_sc = uic.loadUi("main_window.ui")
 alert_sc = uic.loadUi("alerta.ui")
+alt_pwd_user_sc = uic.loadUi("alt_pwd.ui")
 
 # BUTTONS
 # lOGIN
@@ -628,6 +759,9 @@ main_sc.pushButton_7.clicked.connect(def_add_users)
 main_sc.pushButton_15.clicked.connect(def_list_users)
 main_sc.pushButton_16.clicked.connect(def_del_users)
 main_sc.pushButton_17.clicked.connect(def_users_pdf)
+
+main_sc.pushButton_23.clicked.connect(def_alter_pwd_form)
+
 # BATCHES
 main_sc.pushButton_9.clicked.connect(def_add_batch)
 main_sc.pushButton_10.clicked.connect(def_close_batch)
@@ -638,12 +772,16 @@ main_sc.pushButton_19.clicked.connect(def_list_id)
 # REPORTS
 main_sc.pushButton_13.clicked.connect(def_reports_type)
 main_sc.pushButton_14.clicked.connect(def_reports_pdf)
+# POP UPS
 # ALERT
 alert_sc.pushButton.clicked.connect(def_alert_id_open)
 alert_sc.pushButton_2.clicked.connect(def_alert_close)
+# ALT PWD
+alt_pwd_user_sc.pushButton.clicked.connect(def_alter_pwd_user)
 
 
 
 login_sc.show()
 #main_sc.show()
 app.exec()
+
