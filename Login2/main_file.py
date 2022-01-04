@@ -1,6 +1,5 @@
 # import do PyQt5 o módulo Qtwidgets e uic para carregar as telas e as funções atribuidas aos botões
 from PyQt5 import QtWidgets, uic
-from PyQt5 import QtGui
 from PyQt5.QtGui import QPixmap
 import mysql.connector
 from reportlab.pdfgen import canvas
@@ -126,10 +125,6 @@ def def_list_info_users():
     global login_user
     print(login_user)
 
-    #img_users = Image.open('img_users/user1.png')
-
-
-
     cursor = banco2.cursor()
     consulta = ("SELECT nome, login, email FROM login where login = '" + login_user + "'")
     cursor.execute(consulta)
@@ -145,9 +140,9 @@ def def_list_info_users():
     main_sc.label_72.setGeometry(20, 30, 100, 80)
 
 
-
 def def_alter_pwd_form():
     alt_pwd_user_sc.show()
+
 
 def def_alter_pwd_user():
     global login_user
@@ -168,7 +163,6 @@ def def_alter_pwd_user():
 
     else:
         print("nenhum usuário selecionado")
-
 
 
 def def_list_users():
@@ -376,7 +370,6 @@ def def_id_card():
     print(lote_status)
     main_sc.label_65.setText(str(lote))
     main_sc.label_24.setText(str(lote_status))'''
-
 
 
 def def_list_id():
@@ -722,6 +715,7 @@ def def_logout():
 def def_alert_close():
     alert_sc.close()
 
+
 def def_alert_id_open():
     indicador = alert_sc.label.text()
     indicador2 = alert_sc.controle_alert.text()
@@ -734,6 +728,7 @@ def def_alert_id_open():
     else:
         alert_sc.close()
         print("add rem")
+
 
 # FORMS
 app = QtWidgets.QApplication([])
