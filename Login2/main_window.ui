@@ -2011,6 +2011,9 @@ color: rgb(255, 255, 255);</string>
        <bold>true</bold>
       </font>
      </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(0, 85, 255);</string>
+     </property>
      <property name="text">
       <string>Últimos Lotes:</string>
      </property>
@@ -2029,6 +2032,9 @@ color: rgb(255, 255, 255);</string>
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(0, 85, 255);</string>
      </property>
      <property name="text">
       <string>Últimas Carteirinhas cadastradas:</string>
@@ -2087,6 +2093,9 @@ color: rgb(255, 255, 255);</string>
        <weight>75</weight>
        <bold>true</bold>
       </font>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">color: rgb(0, 85, 255);</string>
      </property>
      <property name="text">
       <string>Situação da Remessa:</string>

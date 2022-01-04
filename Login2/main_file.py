@@ -74,15 +74,18 @@ def def_login():
 def def_home():
     main_sc.users.close()
     main_sc.home.show()
+    def_list_home()
     global busca_id
     global login_user
     dt = datetime.datetime.now()
-    print(dt.strftime("%d/%b/%Y"))
-    print(dt.strftime("%A"))
     main_sc.label_34.setText(dt.strftime("%d/%b/%Y"))
     main_sc.label_45.setText(dt.strftime("%A"))
 
 #    global permissao
+
+def def_list_home():
+
+    global login_user
 
     main_sc.label_8.setText(login_user)
     # batches
