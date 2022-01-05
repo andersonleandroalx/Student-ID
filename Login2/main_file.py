@@ -74,9 +74,18 @@ def def_login():
 def def_home():
     main_sc.users.close()
     main_sc.home.show()
+    def_list_home()
     global busca_id
     global login_user
+    dt = datetime.datetime.now()
+    main_sc.label_34.setText(dt.strftime("%d/%b/%Y"))
+    main_sc.label_45.setText(dt.strftime("%A"))
+
 #    global permissao
+
+def def_list_home():
+
+    global login_user
 
     main_sc.label_8.setText(login_user)
     # batches
@@ -163,6 +172,56 @@ def def_alter_pwd_user():
 
     else:
         print("nenhum usuário selecionado")
+
+
+def def_alter_user_form():
+    alt_all_sc.show()
+
+    cursor = banco2.cursor()
+    consulta = ("SELECT nome, email FROM login where login = '" + login_user + "'")
+    cursor.execute(consulta)
+    resultado = cursor.fetchone()
+    nome_user, email_user = resultado
+    alt_all_sc.lineEdit.setText(nome_user)
+    alt_all_sc.lineEdit_2.setText(email_user)
+
+    print(nome_user, email_user)
+
+
+def def_alter_self_user():
+    global login_user
+
+    nome_user = alt_all_sc.lineEdit.text()
+    email_user = alt_all_sc.lineEdit_2.text()
+    senha1 = alt_all_sc.lineEdit_3.text()
+    senha2 = alt_all_sc.lineEdit_4.text()
+    print(nome_user, email_user)
+    if nome_user and email_user and senha1 == "" or senha1 or senha2:
+        cursor = banco2.cursor()
+        consulta = ("UPDATE login SET nome = '" + nome_user + "', email = '" + email_user + "'  where '" + login_user + "' = login")
+        cursor.execute(consulta)
+        #main_sc.label_20.setText("Nome e email atualizados!")
+        def_list_info_users()
+        alt_all_sc.close()
+        print("user e email atualizados")
+        if senha1 != "" and senha2 != "":
+            if senha1 == senha1:
+                cursor = banco2.cursor()
+                consulta = ("UPDATE login SET nome = '" + nome_user + "', email = '" + email_user + "', senha = '" + senha1 + "'  where '" + login_user + "' = login")
+                cursor.execute(consulta)
+                #main_sc.label_20.setText("Senha atualizada com sucesso!!")
+                #alt_pwd_user_sc.close()
+                def_list_info_users()
+                alt_all_sc.close()
+                print("user, email e senhas atualizados")
+            else:
+                print("senhas não batem")
+        else:
+            pass
+
+    else:
+        print("Campos não podem ficar em branco")
+
 
 
 def def_list_users():
@@ -690,18 +749,6 @@ def def_about_app():
     main_sc.reports_id.close()
     main_sc.about_app.show()
 
-    global login_user
-
-    cursor = banco2.cursor()
-    sobre = ("select date_format(data, '%d-%m-%Y'), nome, email from login where login = '" + login_user + "'")
-    cursor.execute(sobre)
-    dados_lidos = cursor.fetchone()
-    data, nome, email = dados_lidos
-    main_sc.label_50.setText(nome)
-    main_sc.label_51.setText(login_user)
-    main_sc.label_52.setText(email)
-    main_sc.label_53.setText(data)
-
 
 # LOGOFF
 def def_logout():
@@ -736,6 +783,7 @@ login_sc = uic.loadUi("login.ui")
 main_sc = uic.loadUi("main_window.ui")
 alert_sc = uic.loadUi("alerta.ui")
 alt_pwd_user_sc = uic.loadUi("alt_pwd.ui")
+alt_all_sc = uic.loadUi("alt_all.ui")
 
 # BUTTONS
 # lOGIN
@@ -754,8 +802,9 @@ main_sc.pushButton_7.clicked.connect(def_add_users)
 main_sc.pushButton_15.clicked.connect(def_list_users)
 main_sc.pushButton_16.clicked.connect(def_del_users)
 main_sc.pushButton_17.clicked.connect(def_users_pdf)
-
 main_sc.pushButton_23.clicked.connect(def_alter_pwd_form)
+main_sc.pushButton_24.clicked.connect(def_alter_user_form)
+
 
 # BATCHES
 main_sc.pushButton_9.clicked.connect(def_add_batch)
@@ -773,6 +822,8 @@ alert_sc.pushButton.clicked.connect(def_alert_id_open)
 alert_sc.pushButton_2.clicked.connect(def_alert_close)
 # ALT PWD
 alt_pwd_user_sc.pushButton.clicked.connect(def_alter_pwd_user)
+# ALT USERS DATA
+alt_all_sc.pushButton.clicked.connect(def_alter_self_user)
 
 
 
