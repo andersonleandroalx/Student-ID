@@ -3,8 +3,10 @@ from PyQt5 import QtWidgets, uic
 from PyQt5.QtGui import QPixmap
 import mysql.connector
 from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+
 import datetime
-from reportlab.lib.pagesizes import A4
+import os
 
 # GLOBALS
 numero_id = None
@@ -12,7 +14,7 @@ busca_id = None
 busca_id2 = None
 busca_id3 = None
 login_user = ""
-permissao = None
+remessa = None
 
 # DATABASE LINK
 banco2 = mysql.connector.connect(
@@ -73,6 +75,7 @@ def def_login():
 # START HOME
 def def_home():
     main_sc.users.close()
+    main_sc.control.close()
     main_sc.home.show()
     def_list_home()
     global busca_id
@@ -81,10 +84,8 @@ def def_home():
     main_sc.label_34.setText(dt.strftime("%d/%b/%Y"))
     main_sc.label_45.setText(dt.strftime("%A"))
 
-#    global permissao
 
 def def_list_home():
-
     global login_user
 
     main_sc.label_8.setText(login_user)
@@ -102,10 +103,8 @@ def def_list_home():
             main_sc.tableWidget.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
 
     # carteirinhas
-    busca_id = "Tudo"
-
     cursor = banco2.cursor()
-    comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y')data, nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by id desc LIMIT 3")
+    comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids order by cod_id desc LIMIT 3")
     cursor.execute(comando_sql2)
     dados_lidos = cursor.fetchall()
 
@@ -121,11 +120,13 @@ def def_list_home():
 
 # START USERS
 def def_users():
+    main_sc.label_20.setText("")
     main_sc.home.close()
     main_sc.batch.close()
     main_sc.id_card.close()
     main_sc.reports_id.close()
     main_sc.about_app.close()
+    main_sc.control.close()
     main_sc.users.show()
     def_list_info_users()
 
@@ -151,6 +152,8 @@ def def_list_info_users():
 
 def def_alter_pwd_form():
     alt_pwd_user_sc.show()
+    alt_pwd_user_sc.lineEdit.setText("")
+    alt_pwd_user_sc.lineEdit_2.setText("")
 
 
 def def_alter_pwd_user():
@@ -223,7 +226,6 @@ def def_alter_self_user():
         print("Campos não podem ficar em branco")
 
 
-
 def def_list_users():
     #global permissao
     #print(type(permissao))
@@ -250,6 +252,9 @@ def def_add_users():
     senha1 = main_sc.lineEdit_3.text()
     senha2 = main_sc.lineEdit_4.text()
     email = main_sc.lineEdit_5.text()
+
+    login1 = login1.lower()
+    email = email.lower()
 
     if nome and login1 and senha1 and senha2 and email:
         if '@' in email and '.' in email[email.find('@'):]:
@@ -317,8 +322,10 @@ def def_users_pdf():
 # END USERS
 
 
-# START BATCH
+# START BATCH - REMESSA
 def def_batch():
+    global remessa
+    print(remessa)
     main_sc.label_38.setText("")
     main_sc.lineEdit_9.setText("")
     main_sc.home.close()
@@ -326,7 +333,10 @@ def def_batch():
     main_sc.id_card.close()
     main_sc.reports_id.close()
     main_sc.about_app.close()
+    main_sc.control.close()
     main_sc.batch.show()
+    #def_remessa_search()
+    #print(remessa)
 
 
 def def_check_batch():
@@ -408,6 +418,56 @@ def def_list_batch():
 
 def def_pdf_batch(): # criar função
     pass
+
+
+def def_remessa_search():
+    global remessa
+
+    consulta1 = "select * from listarloteremessa"
+
+    cursor = banco2.cursor()
+    cursor.execute(consulta1)
+    remessa = cursor.fetchone()
+
+
+def def_remessa_status():
+    pass
+# n remessa
+# total pos
+# total graducao
+# total 1via
+# total 2via
+# total funcionarios
+# total alunos
+
+
+def def_remessa_open():
+    print("teste")
+
+    cursor = banco2.cursor()
+    cursor.execute("INSERT INTO remessa1 (cod_lote) VALUES (7)")
+
+    #lote1, lote_status = remessa
+    #print(lote1, lote_status)
+    #lote = str(lote1)
+    #print(lote)
+    #print(30*"-")
+
+
+    #if lote_status == "Fechado":
+        #cursor = banco2.cursor()
+        ##cursor2.execute("INSERT INTO remessa1 (cod_lote, qtde_total, qtde_pos, qtde_grad, qtde_pvia, qtde_svia, qtde_func , qtde_alunos, data_abertura, status_remessa, usuario) VALUES ('" + str(lote) + "', 1, 2, 3, 4, 5, 6, 7, now(), 'Aberta', '" + login_user + "')")
+       # cursor.execute("INSERT INTO remessa1 (cod_lote) VALUES (7)")
+      #  print("OK - lote fechado")
+    #else:
+     #   print("lote aberto")
+
+
+def def_remessa_control():
+    remessa_cont_sc.show()
+
+
+
 # END BATCH
 
 
@@ -418,6 +478,7 @@ def def_id_card():
     main_sc.batch.close()
     main_sc.reports_id.close()
     main_sc.about_app.close()
+    main_sc.control.close()
     main_sc.id_card.show()
     #def_check_batch()
 
@@ -533,6 +594,7 @@ def def_reports_id():
     main_sc.batch.close()
     main_sc.id_card.close()
     main_sc.about_app.close()
+    main_sc.control.close()
     main_sc.reports_id.show()
 
 
@@ -548,7 +610,7 @@ def def_reports_all():
         dados_lidos = cursor.fetchall()
     else:
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by ID desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 order by cod_id desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
 
@@ -565,6 +627,9 @@ def def_reports_name():
     global busca_id
     global busca_id2
     global busca_id3
+    print("buscaid ", busca_id)
+    print("buscaid2 ", busca_id2)
+    print("buscaid3 ", busca_id3)
     #relcarteirinhas.show()
 
     if busca_id2 == 'nome':
@@ -579,7 +644,7 @@ def def_reports_name():
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "lote":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where lote like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 where lote like '" + busca_id + "' order by cod_id desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "usuario":
@@ -607,9 +672,10 @@ def def_reports_type():
     global busca_id
     global busca_id2
     global busca_id3
-    # tipo1 = ""
+    print("buscaid ", busca_id)
+    print("buscaid2 ", busca_id2)
+    print("buscaid3 ", busca_id3)
 
-    # if tipo1 == "teste":
     if main_sc.radioButton_4.isChecked():
         busca_id = "1ª Via"
         def_reports_all()
@@ -657,7 +723,7 @@ def def_reports_pdf():
 
     if busca_id == "":
         cursor = banco2.cursor()
-        comando_sql = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas order by ID desc")
+        comando_sql = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids order by cod_id desc")
         cursor.execute(comando_sql)
         dados_lidos = cursor.fetchall()
 
@@ -711,13 +777,17 @@ def def_reports_pdf():
         dados_lidos = cursor.fetchall()
 
     y = 0
-    pdf = canvas.Canvas("cadastro_carteirinhas.pdf")
+    save_name = "Cadastro de Cartoes"
+    pdf = canvas.Canvas(save_name + ".pdf", pagesize=letter)
     pdf.setFont("Times-Bold", 18)
-    pdf.drawString(200, 800, "Relatório - ID's Estudante: ")
+    pdf.drawString(150, 2300, "Relatório - ID's Estudante: ")
     # 200 é a distância do inicio do paragrafo levanto em conta a borda esquerda
     pdf.setFont("Times-Bold", 10)
 
-    pdf.drawString(20, 780, "Quantidade de ID's: ")
+
+
+    #pdf.drawInlineImage(self,,20, 780, )
+    #pdf.drawString(20, 780, "Quantidade de ID's: ")
     pdf.drawString(20, 750, "Lote")
     pdf.drawString(50, 750, "Data")
     pdf.drawString(150, 750, "Nome")
@@ -747,15 +817,109 @@ def def_about_app():
     main_sc.batch.close()
     main_sc.id_card.close()
     main_sc.reports_id.close()
+    main_sc.control.close()
     main_sc.about_app.show()
 
 
-# LOGOFF
-def def_logout():
-    main_sc.close()
-    login_sc.show()
-    login_sc.lineEdit.setText("")
-    login_sc.lineEdit_2.setText("")
+# CONTROL
+def def_control():
+    main_sc.home.close()
+    main_sc.users.close()
+    main_sc.batch.close()
+    main_sc.id_card.close()
+    main_sc.reports_id.close()
+    main_sc.about_app.close()
+    main_sc.control.show()
+
+
+def def_control_type():
+
+    global busca_id
+    global busca_id2
+
+    if main_sc.radioButton_18.isChecked():
+        busca_id2 = "nome"
+        busca_id = main_sc.lineEdit_12.text()
+        def_control_list()
+    elif main_sc.radioButton_19.isChecked():
+        busca_id2 = "ra"
+        busca_id = main_sc.lineEdit_12.text()
+        def_control_list()
+    else:
+        print("nome escolhido else nada")
+        print("buscaid {} e buscaid2 {}".format(busca_id, busca_id2))
+        print("control type")
+        print(30 * "-")
+
+
+def def_control_list():
+
+    global busca_id
+    global busca_id2
+
+    if busca_id2 == 'nome':
+        cursor = banco2.cursor()
+        comando_sql2 = ("SELECT nome, ra, control_id FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
+        cursor.execute(comando_sql2)
+        dados_lidos = cursor.fetchall()
+        print(dados_lidos)
+    elif busca_id2 == "ra":
+        cursor = banco2.cursor()
+        comando_sql2 = ("SELECT nome, ra, control_id FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
+        cursor.execute(comando_sql2)
+        dados_lidos = cursor.fetchall()
+        print(dados_lidos)
+    else:
+        print("control list por nada")
+        print("buscaid {} e buscaid2 {}".format(busca_id, busca_id2))
+        print(30 * "-")
+
+    main_sc.tableWidget_7.setRowCount(len(dados_lidos))
+    main_sc.tableWidget_7.setColumnCount(3)
+
+    for i in range(0, len(dados_lidos)):
+        for j in range(0, 3):
+            main_sc.tableWidget_7.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos[i][j])))
+
+
+def def_control_alt():
+    status = None
+    ra_escolhido = main_sc.lineEdit_13.text()
+
+    if ra_escolhido:
+        if main_sc.radioButton_13.isChecked():
+            status = "OK"
+            main_sc.label_99.setText("Status alterado com sucesso")
+            print(status)
+        elif main_sc.radioButton_14.isChecked():
+            status = "Recusado"
+            main_sc.label_99.setText("Status alterado com sucesso")
+            print(status)
+        elif main_sc.radioButton_15.isChecked():
+            status = "Não Entregue"
+            main_sc.label_99.setText("Status alterado com sucesso")
+            print(status)
+        elif main_sc.radioButton_16.isChecked():
+            status = "Cancelado"
+            main_sc.label_99.setText("Status alterado com sucesso")
+            print(status)
+        elif main_sc.radioButton_17.isChecked():
+            status = "Outro Motivo"
+            main_sc.label_99.setText("Status alterado com sucesso")
+            print(status)
+        else:
+            main_sc.label_99.setText("Escolha um Status")
+
+        cursor = banco2.cursor()
+        comando_sql2 = ("UPDATE carteirinhas SET control_id = '" + status + "' where ra = '" + ra_escolhido + "'")
+        cursor.execute(comando_sql2)
+
+    else:
+        main_sc.label_99.setText("Digite o RA e escolha um Status para alteração")
+
+
+def def_control_status():
+    def_control_alt()
 
 
 # ALERT
@@ -777,6 +941,9 @@ def def_alert_id_open():
         print("add rem")
 
 
+def def_help():
+    help_sc.show()
+
 # FORMS
 app = QtWidgets.QApplication([])
 login_sc = uic.loadUi("login.ui")
@@ -784,6 +951,8 @@ main_sc = uic.loadUi("main_window.ui")
 alert_sc = uic.loadUi("alerta.ui")
 alt_pwd_user_sc = uic.loadUi("alt_pwd.ui")
 alt_all_sc = uic.loadUi("alt_all.ui")
+remessa_cont_sc = uic.loadUi("remessa_control.ui")
+help_sc = uic.loadUi(("help.ui"))
 
 # BUTTONS
 # lOGIN
@@ -796,7 +965,8 @@ main_sc.pushButton_4.clicked.connect(def_id_card)
 main_sc.pushButton_5.clicked.connect(def_reports_id)
 main_sc.pushButton_6.clicked.connect(def_about_app)
 main_sc.pushButton_8.clicked.connect(def_add_idcard)
-main_sc.pushButton_18.clicked.connect(def_logout)
+main_sc.pushButton_18.clicked.connect(def_control)
+main_sc.pushButton_30.clicked.connect(def_help)
 # USERS
 main_sc.pushButton_7.clicked.connect(def_add_users)
 main_sc.pushButton_15.clicked.connect(def_list_users)
@@ -811,11 +981,18 @@ main_sc.pushButton_9.clicked.connect(def_add_batch)
 main_sc.pushButton_10.clicked.connect(def_close_batch)
 main_sc.pushButton_11.clicked.connect(def_list_batch)
 main_sc.pushButton_12.clicked.connect(def_del_batch)
+
+main_sc.pushButton_26.clicked.connect(def_remessa_open)
+main_sc.pushButton_27.clicked.connect(def_remessa_control)
 # ID
 main_sc.pushButton_19.clicked.connect(def_list_id)
 # REPORTS
 main_sc.pushButton_13.clicked.connect(def_reports_type)
 main_sc.pushButton_14.clicked.connect(def_reports_pdf)
+# CONTROL
+main_sc.pushButton_28.clicked.connect(def_control_status)
+main_sc.pushButton_29.clicked.connect(def_control_type)
+
 # POP UPS
 # ALERT
 alert_sc.pushButton.clicked.connect(def_alert_id_open)
@@ -824,10 +1001,15 @@ alert_sc.pushButton_2.clicked.connect(def_alert_close)
 alt_pwd_user_sc.pushButton.clicked.connect(def_alter_pwd_user)
 # ALT USERS DATA
 alt_all_sc.pushButton.clicked.connect(def_alter_self_user)
+# REMESSA CONTROL
+# HELP
+
 
 
 
 login_sc.show()
 #main_sc.show()
 app.exec()
+
+
 
