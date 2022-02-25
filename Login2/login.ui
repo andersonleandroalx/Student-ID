@@ -45,7 +45,8 @@
      </font>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(85, 170, 0);</string>
+     <string notr="true">background-color: rgb(85, 170, 0);
+</string>
     </property>
     <property name="text">
      <string>Login</string>
@@ -248,7 +249,8 @@ border-width: 2px;</string>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(85, 170, 255);</string>
+     <string notr="true">background-color: rgb(85, 170, 255);
+border-radius: 5px;</string>
     </property>
     <property name="frameShape">
      <enum>QFrame::Box</enum>

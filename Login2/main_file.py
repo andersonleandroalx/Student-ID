@@ -8,6 +8,12 @@ from reportlab.lib.pagesizes import letter
 import datetime
 import os
 
+#emails
+import yagmail
+import win32com.client as win32
+from imap_tools import MailBox, AND
+
+
 # GLOBALS
 numero_id = None
 busca_id = None
@@ -35,6 +41,8 @@ def def_login():
     nome_user = login_sc.lineEdit.text()
     senha = login_sc.lineEdit_2.text()
     print(nome_user, senha)
+
+    nome_user = nome_user.lower()
 
     if nome_user and senha:
         try:
@@ -83,6 +91,7 @@ def def_home():
     dt = datetime.datetime.now()
     main_sc.label_34.setText(dt.strftime("%d/%b/%Y"))
     main_sc.label_45.setText(dt.strftime("%A"))
+
 
 
 def def_list_home():
@@ -161,9 +170,9 @@ def def_alter_pwd_user():
 
     senha1 = alt_pwd_user_sc.lineEdit.text()
     senha2 = alt_pwd_user_sc.lineEdit_2.text()
-
+    print(login_user)
     print(senha1, senha2)
-    if login_user:
+    if login_user and senha1 and senha2:
         if senha1 == senha2:
             cursor = banco2.cursor()
             consulta = ("UPDATE login SET senha = '" + senha1 + "' where '" + login_user + "' = login")
@@ -174,7 +183,7 @@ def def_alter_pwd_user():
             main_sc.label_20.setText("Senhas estão diferentes!")
 
     else:
-        print("nenhum usuário selecionado")
+        main_sc.label_20.setText("Digite uma senha!")
 
 
 def def_alter_user_form():
@@ -199,37 +208,36 @@ def def_alter_self_user():
     senha1 = alt_all_sc.lineEdit_3.text()
     senha2 = alt_all_sc.lineEdit_4.text()
     print(nome_user, email_user)
-    if nome_user and email_user and senha1 == "" or senha1 or senha2:
+
+    if nome_user and email_user:
         cursor = banco2.cursor()
         consulta = ("UPDATE login SET nome = '" + nome_user + "', email = '" + email_user + "'  where '" + login_user + "' = login")
         cursor.execute(consulta)
-        #main_sc.label_20.setText("Nome e email atualizados!")
-        def_list_info_users()
-        alt_all_sc.close()
+        main_sc.label_20.setText("Nome e email atualizados!")
+        #def_list_info_users()
+        #alt_all_sc.close()
         print("user e email atualizados")
-        if senha1 != "" and senha2 != "":
-            if senha1 == senha1:
+
+        if senha1 and senha2:
+            if senha1 == senha2:
                 cursor = banco2.cursor()
                 consulta = ("UPDATE login SET nome = '" + nome_user + "', email = '" + email_user + "', senha = '" + senha1 + "'  where '" + login_user + "' = login")
                 cursor.execute(consulta)
-                #main_sc.label_20.setText("Senha atualizada com sucesso!!")
-                #alt_pwd_user_sc.close()
+                main_sc.label_20.setText("Senha atualizada com sucesso!!")
+                alt_pwd_user_sc.close()
                 def_list_info_users()
                 alt_all_sc.close()
                 print("user, email e senhas atualizados")
             else:
-                print("senhas não batem")
+                main_sc.label_20.setText("As senhas não conferem")
         else:
             pass
 
     else:
-        print("Campos não podem ficar em branco")
+        main_sc.label_20.setText("Campos não podem ficar em branco")
 
 
 def def_list_users():
-    #global permissao
-    #print(type(permissao))
-    #if permissao == '1':
 
     cursor = banco2.cursor()
     comando_sql1 = ("SELECT date_format(data, '%d-%m-%Y')data, nome, login, email FROM login order by id")
@@ -242,8 +250,6 @@ def def_list_users():
     for i in range(0, len(dados_lidos1)):
         for j in range(0, 4):
             main_sc.tableWidget_6.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos1[i][j])))
-    #else:
-        #main_sc.label_20.setText("Usuário sem permissão")
 
 
 def def_add_users():
@@ -358,12 +364,16 @@ def def_add_batch():
         abrir = ("Insert into controle_lote1 (lote, data_abert, data_fech, lote_status) values ('" + nlote + "', now(), null, 'Aberto')")
         cursor2.execute(abrir)
         main_sc.label_38.setText("Novo Lote Aberto")
+        main_sc.label_65.setText(nlote)
+        main_sc.label_93.setText("Aberto")
         def_list_batch()
         alert_sc.show()
         alert_sc.controle_alert.setText("add_id")
         alert_sc.label.setText("Deseja cadastrar novos cartões de estudante agora?")
     else:
         main_sc.label_38.setText("Preencha o lote")
+
+
 
 
 def def_close_batch():
@@ -374,6 +384,8 @@ def def_close_batch():
         consulta = ("Update controle_lote1 set data_fech = now(), lote_status = 'Fechado' where lote = '" + nlote + "' ")
         cursor2.execute(consulta)
         main_sc.label_38.setText("O lote selecionado foi fechado")
+        main_sc.label_65.setText(nlote)
+        main_sc.label_93.setText("Fechado")
         def_list_batch()
         alert_sc.show()
         alert_sc.controle_alert.setText("add_rem")
@@ -420,11 +432,26 @@ def def_pdf_batch(): # criar função
     pass
 
 
+def def_last_batch():
+
+    cursor = banco2.cursor()
+    consulta = "SELECT max(lote), lote_status from controle_lote1"
+    cursor.execute(consulta)
+    resultado = cursor.fetchone()
+    lote1, status1 = resultado
+    lote = str(lote1)
+    main_sc.label_65.setText(lote)
+    main_sc.label_93.setText(status1)
+    print(resultado)
+    print(lote1, status1)
+
+
+
+
 def def_remessa_search():
     global remessa
 
     consulta1 = "select * from listarloteremessa"
-
     cursor = banco2.cursor()
     cursor.execute(consulta1)
     remessa = cursor.fetchone()
@@ -481,6 +508,7 @@ def def_id_card():
     main_sc.control.close()
     main_sc.id_card.show()
     #def_check_batch()
+    #def_last_batch()
 
     '''global permissao
     print("lote do add-id:", permissao)
@@ -509,17 +537,17 @@ def def_list_id():
 
 def def_add_idcard(): # Melhorar função
     global login_user
-    #global permissao
-    #lote2, lote_status = permissao
-    #print(permissao)
-    lote_status = "Fechado"
+
+    lote1 = main_sc.label_65.text()
+    lote_status = main_sc.label_93.text()
+    #lote_status = "Aberto"
 
     #lote1 =  main_sc.label_65.text()
     #print(lote_status)
-    lote1 = main_sc.lineEdit_6.text()
+    #lote1 = main_sc.lineEdit_6.text()
     nome1 = main_sc.lineEdit_7.text()
     ra1 = main_sc.lineEdit_8.text()
-    print(lote1, nome1, ra1)
+    print(lote1, nome1, ra1, lote_status)
     print(type(lote1))
     print(type(nome1))
     print(type(ra1))
@@ -535,6 +563,15 @@ def def_add_idcard(): # Melhorar função
     else:
         tipo1 = ""
 
+    if main_sc.radioButton_20.isChecked():
+        tipo2 = "Aluno"
+    elif main_sc.radioButton_21.isChecked():
+        tipo2 = "Professor"
+    elif main_sc.radioButton_22.isChecked():
+        tipo2 = "Funcionário"
+    else:
+        tipo2 = ""
+
     print(30*"-")
     print(type(tipo1))
     print(tipo1)
@@ -542,12 +579,13 @@ def def_add_idcard(): # Melhorar função
     if lote_status == "Aberto":
         if lote1 and nome1 and ra1 and tipo1:
             cursor = banco2.cursor()
-            comando_sql = ("INSERT INTO carteirinhas (id, lote, data, nome, ra, tipo, categoria, user_cadastro) VALUES (null, '" + lote1 + "', now(),'" + nome1 + "','" + ra1 + "','" + tipo1 + "', 'Aluno', '" + login_user + "')")
+            comando_sql = "INSERT INTO carteirinhas (id, lote, data, nome, ra, tipo, categoria, user_cadastro) VALUES (null, '" + lote1 + "', now(),'" + nome1 + "','" + ra1 + "','" + tipo1 + "', '"+tipo2+"', '" + login_user + "')"
             cursor.execute(comando_sql)
-            print("ok")
+            main_sc.label_29.setText("Cartão cadastrado com sucesso!")
         else:
-            print("erro")
+            main_sc.label_29.setText("Erro")
     else:
+        main_sc.label_29.setText("Lote está fechado, abra outro para iniciar")
         print("Lote está fechado, abra outro para iniciar")
 
     #cursor = banco2.cursor()
@@ -605,7 +643,7 @@ def def_reports_all():
 
     if busca_id != "":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where tipo = '" + busca_id + "' order by ID desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 where tipo = '" + busca_id + "' order by cod_id desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     else:
@@ -634,12 +672,12 @@ def def_reports_name():
 
     if busca_id2 == 'nome':
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 where nome like '%" + busca_id + "%' order by cod_id desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "ra":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 where ra like '" + busca_id + "%' order by cod_id desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "lote":
@@ -649,12 +687,12 @@ def def_reports_name():
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "usuario":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where user_cadastro like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 where user_cadastro like '%" + busca_id + "%' order by cod_id desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
     elif busca_id2 == "data":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT lote, date_format(data, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM carteirinhas where data between '" + busca_id + "' and '" + busca_id3 + "' order by data desc")
+        comando_sql2 = ("SELECT lote, date_format(data_c, '%d-%m-%Y'), nome, ra, tipo, categoria, user_cadastro FROM ids2 where data between '" + busca_id + "' and '" + busca_id3 + "' order by data_c desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
 
@@ -859,13 +897,13 @@ def def_control_list():
 
     if busca_id2 == 'nome':
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT nome, ra, control_id FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT nome, ra, control_id, control_obs FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
         print(dados_lidos)
     elif busca_id2 == "ra":
         cursor = banco2.cursor()
-        comando_sql2 = ("SELECT nome, ra, control_id FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
+        comando_sql2 = ("SELECT nome, ra, control_id, control_obs FROM carteirinhas where ra like '%" + busca_id + "%' order by ID desc")
         cursor.execute(comando_sql2)
         dados_lidos = cursor.fetchall()
         print(dados_lidos)
@@ -875,45 +913,50 @@ def def_control_list():
         print(30 * "-")
 
     main_sc.tableWidget_7.setRowCount(len(dados_lidos))
-    main_sc.tableWidget_7.setColumnCount(3)
+    main_sc.tableWidget_7.setColumnCount(4)
 
     for i in range(0, len(dados_lidos)):
-        for j in range(0, 3):
+        for j in range(0, 4):
             main_sc.tableWidget_7.setItem(i, j, QtWidgets.QTableWidgetItem(str(dados_lidos[i][j])))
 
 
 def def_control_alt():
-    status = None
+    status = ""
     ra_escolhido = main_sc.lineEdit_13.text()
+    obs = ""
 
     if ra_escolhido:
         if main_sc.radioButton_13.isChecked():
             status = "OK"
-            main_sc.label_99.setText("Status alterado com sucesso")
+
             print(status)
         elif main_sc.radioButton_14.isChecked():
             status = "Recusado"
-            main_sc.label_99.setText("Status alterado com sucesso")
+
             print(status)
         elif main_sc.radioButton_15.isChecked():
             status = "Não Entregue"
-            main_sc.label_99.setText("Status alterado com sucesso")
+
             print(status)
         elif main_sc.radioButton_16.isChecked():
             status = "Cancelado"
-            main_sc.label_99.setText("Status alterado com sucesso")
+
             print(status)
         elif main_sc.radioButton_17.isChecked():
-            status = "Outro Motivo"
-            main_sc.label_99.setText("Status alterado com sucesso")
+            status = "Outros Motivos"
+            obs = main_sc.textEdit.toPlainText()
+
             print(status)
         else:
             main_sc.label_99.setText("Escolha um Status")
 
-        cursor = banco2.cursor()
-        comando_sql2 = ("UPDATE carteirinhas SET control_id = '" + status + "' where ra = '" + ra_escolhido + "'")
-        cursor.execute(comando_sql2)
-
+        if status and ra_escolhido:
+            cursor = banco2.cursor()
+            comando_sql2 = "UPDATE carteirinhas SET control_id = '" + status + "', control_obs = '"+obs+"' where ra = '" + ra_escolhido + "'"
+            cursor.execute(comando_sql2)
+            main_sc.label_99.setText("Status alterado com sucesso")
+        else:
+            main_sc.label_99.setText("Está faltando algo")
     else:
         main_sc.label_99.setText("Digite o RA e escolha um Status para alteração")
 
@@ -943,6 +986,43 @@ def def_alert_id_open():
 
 def def_help():
     help_sc.show()
+
+# CONVENIENCIAS
+def exerc_outlook():
+    #outlook
+    gerentes_df = pd.read_excel(r'C:\Imports\emails.xlsx')
+    #print(gerentes_df)
+
+    cursor = banco2.cursor()
+    comando_sql2 = (
+                "SELECT nome, ra, control_id, control_obs FROM carteirinhas where nome like '%" + busca_id + "%' order by ID desc")
+    cursor.execute(comando_sql2)
+    dados_lidos = cursor.fetchall()
+    print(dados_lidos)
+
+
+    for i, email in enumerate(gerentes_df['Email']):
+        gerente = gerentes_df.loc[i, 'Gerente']
+        area = gerentes_df.loc[i, 'Relatório']
+
+        outlook = win32.Dispatch('outlook.application')
+        mail = outlook.CreateItem(0)
+
+        mail.To = email
+        mail.Subject = 'Relatório de {}'.format(area)
+        mail.Body = '''
+            Prezado {},
+            Segue anexo relatório de {}, conforme solicitado.
+            Qualquer dúvida, estou à disposição.
+            Att.,
+            Anderson
+        '''.format(gerente, area)
+
+        attachment = r'C:\Imports\{}.xlsx'.format(area)   #passar com o caminho inteiro do arquivo
+        mail.Attachments.Add(attachment)
+
+        mail.Send()
+
 
 # FORMS
 app = QtWidgets.QApplication([])
